@@ -23,7 +23,9 @@
         "Command Center deploys without bundling Academy code or secrets.",
         "Breaking engine contract surfaces release failure before traffic shifts."
       ],
-      "pullRequests": []
+      "pullRequests": [
+        1
+      ]
     },
     {
       "id": "SCC-002",
