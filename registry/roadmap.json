@@ -46,7 +46,9 @@
         "Same test tool yields same artifact data in both apps.",
         "Visual regression verifies compact treatment and absence of education components."
       ],
-      "pullRequests": []
+      "pullRequests": [
+        2
+      ]
     },
     {
       "id": "SCC-003",
