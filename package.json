@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test",
+    "test": "node --test test/*.test.mjs",
     "check": "node --check app/page.mjs && node --check app/layout.mjs && node --check app/api/health/route.mjs && node --check app/api/engine/route.mjs"
   },
   "dependencies": {
