@@ -1,0 +1,22 @@
+{
+  "name": "superintelligence-command-center",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check app/page.mjs && node --check app/layout.mjs && node --check app/api/health/route.mjs && node --check app/api/engine/route.mjs"
+  },
+  "dependencies": {
+    "next": "^15.5.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "@superintelligence/ui": "file:vendor/engine/packages/ui"
+  }
+}
