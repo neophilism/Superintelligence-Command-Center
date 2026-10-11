@@ -1,0 +1,10 @@
+# Canonical plan: registry/roadmap.json. This is a secondary manifest; do not parse this as a separate denominator.
+project:
+  name: Superintelligence-Command-Center
+  display_name: Superintelligence Command Center
+  repository: neophilism/Superintelligence-Command-Center
+  status: active-development
+roadmap:
+  version: 1
+  planned_prs: 19
+  approved: true
