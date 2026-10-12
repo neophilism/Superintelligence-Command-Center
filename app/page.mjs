@@ -1,6 +1,6 @@
 "use client";
 import React,{useEffect,useState} from 'react';
-import {WorkspaceShell,ToolPanel,DomainTool,WORKSPACE_DOMAINS} from '@superintelligence/ui';
+import {WorkspaceShell,ToolPanel,DomainTool,WORKSPACE_DOMAINS,ProjectPortal} from '@superintelligence/ui';
 import CommandPalette from '../components/command-palette.mjs';
 import ModelControls from '../components/model-controls.mjs';
 const names={code:'Code',music:'Music',poetry:'Poetry','persuasive-writing':'Persuasive writing',research:'Research',legislation:'Legislation',image:'Images',video:'Film & video',voice:'Voice',data:'Data',workflow:'Workflows'};
@@ -25,6 +25,7 @@ export default function Page(){
        ...WORKSPACE_DOMAINS.map(domain=>React.createElement('button',{key:domain,type:'button','aria-current':active===domain?'page':undefined,'data-domain-option':domain,className:active===domain?'nav-link active':'nav-link',onClick:()=>{setActive(domain);setMessage('')}},names[domain]))),
      React.createElement('main',{id:'main',className:'app-main',tabIndex:-1},
        React.createElement('div',{className:'hero'},React.createElement('p',{className:'eyebrow'},"AI COMMAND WORKSPACE"),React.createElement('h1',null,"Everything you create, in one place"),React.createElement('p',null,"Choose a domain. The workspace interface is shared with Academy, without instructional overlays or courseware.")),
+       React.createElement(ProjectPortal,{product:"command",domain:active,engineOrigin:process.env.NEXT_PUBLIC_ENGINE_ORIGIN||'',companionOrigin:process.env.NEXT_PUBLIC_ACADEMY_ORIGIN||'',onOpenProject:project=>{if(WORKSPACE_DOMAINS.includes(project.kind))setActive(project.kind);setMessage('')}}),
        React.createElement(ModelControls,{domain:active}),
        React.createElement(WorkspaceShell,{product:"command",domain:active,title:names[active]},
          React.createElement(ToolPanel,{title:'Prepare your work'},
