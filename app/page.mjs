@@ -1,6 +1,7 @@
 "use client";
 import React,{useEffect,useState} from 'react';
 import {WorkspaceShell,ToolPanel,DomainTool,WORKSPACE_DOMAINS} from '@superintelligence/ui';
+import CommandPalette from '../components/command-palette.mjs';
 const names={code:'Code',music:'Music',poetry:'Poetry','persuasive-writing':'Persuasive writing',research:'Research',legislation:'Legislation',image:'Images',video:'Film & video',voice:'Voice',data:'Data',workflow:'Workflows'};
 const controls=[{id:'objective',kind:'textarea',label:'Project objective',description:'Define what you want to accomplish. External AI execution is unavailable until an authorized provider and spending controls are connected.',rows:5}];
 export default function Page(){
@@ -14,7 +15,9 @@ export default function Page(){
    React.createElement('a',{className:'skip-link',href:'#main'},'Skip to main content'),
    React.createElement('header',{className:'app-header'},
      React.createElement('div',{className:'brand'},React.createElement('span',{className:'brand-mark','aria-hidden':'true'},"▣"),React.createElement('span',null,"Superintelligence Command Center")),
-     React.createElement('span',{className:'connection-status',role:'status','aria-live':'polite'},'Engine: '+engine.status)),
+     React.createElement('div',{className:'command-header-tools'},
+       React.createElement(CommandPalette,{active,onChoose:domain=>{setActive(domain);setMessage('')}}),
+       React.createElement('span',{className:'connection-status',role:'status','aria-live':'polite'},'Engine: '+engine.status))),
    React.createElement('div',{className:'app-columns'},
      React.createElement('nav',{'aria-label':'AI workspaces',className:'app-nav'},
        React.createElement('div',{className:'nav-heading'},'Workspaces'),
