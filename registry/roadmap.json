@@ -70,7 +70,9 @@
         "Academy-authored project reopens with exact revision graph and files.",
         "Changing org scope invalidates unauthorized deep links."
       ],
-      "pullRequests": []
+      "pullRequests": [
+        6
+      ]
     },
     {
       "id": "SCC-004",
