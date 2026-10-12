@@ -22,7 +22,7 @@ export default function ModelControls({domain}){
  const [usage,setUsage]=useState('personal'),[models,setModels]=useState([]),[status,setStatus]=useState('checking');
  const [quality,setQuality]=useState('balanced'),[selected,setSelected]=useState(null),[comparison,setComparison]=useState([]);
  const eligible=availableModels(models,domain);
- useEffect(()=>{const prior=loadPreference(domain);setQuality(['speed','balanced','quality'].includes(prior?.quality)?prior.quality:'balanced');setSelected(prior?.modelId||null);setComparison([])},[domain]);
+ useEffect(()=>{const prior=loadPreference(domain);setUsage(['personal','commercial'].includes(prior?.usage)?prior.usage:'personal');setQuality(['speed','balanced','quality'].includes(prior?.quality)?prior.quality:'balanced');setSelected(prior?.modelId||null);setComparison([])},[domain]);
  useEffect(()=>{let live=true;const abort=new AbortController();
   setStatus('checking');setModels([]);
   fetch('/api/models?usage='+encodeURIComponent(usage),{cache:'no-store',signal:abort.signal})
@@ -30,7 +30,7 @@ export default function ModelControls({domain}){
    .catch(()=>{if(live)setStatus('unavailable')});
   return()=>{live=false;abort.abort()};
  },[usage]);
- useEffect(()=>{if(selected&&!eligible.some(m=>m.id===selected))setSelected(null)},[selected,domain,usage,models]);
+ useEffect(()=>{if(status==='connected'&&selected&&!eligible.some(m=>m.id===selected))setSelected(null)},[selected,domain,usage,models,status]);
  function save(modelId=selected,nextQuality=quality){
   try{localStorage.setItem('command.model-settings.v1.'+domain,JSON.stringify({modelId,quality:nextQuality,usage}))}catch{}
  }
