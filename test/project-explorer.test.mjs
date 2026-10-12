@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';import ProjectExplorer,{searchProjects,describeRevision} from '../components/project-explorer.mjs';
+test('case-insensitive search and stable alphabetical order',()=>{const p=[{title:'Zoo',kind:'music',id:'z'},{title:'Alpha',kind:'code',id:'a'}];assert.deepEqual(searchProjects(p,'' ).map(v=>v.id),['a','z']);assert.equal(searchProjects(p,'MUSIC')[0].id,'z');assert.equal(searchProjects(p,'zz').length,0)});
+test('revision provenance is plainly rendered',()=>{assert.match(describeRevision({revision:3,checksum:'abc',mediaType:'text/plain'}),/checksum abc/)});
+test('unconfigured explorer reveals no fabricated data or project titles',()=>{const html=renderToStaticMarkup(React.createElement(ProjectExplorer,{engineOrigin:''}));assert.match(html,/Configure the engine origin/);assert.doesNotMatch(html,/sample project/i)});
