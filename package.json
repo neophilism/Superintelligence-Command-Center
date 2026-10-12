@@ -11,7 +11,7 @@
     "build": "next build",
     "start": "next start",
     "test": "node --test test/*.test.mjs",
-    "check": "node --check app/page.mjs && node --check app/layout.mjs && node --check app/api/health/route.mjs && node --check app/api/engine/route.mjs && node --check components/model-controls.mjs && node --check app/api/models/route.mjs"
+    "check": "node --check app/page.mjs && node --check app/layout.mjs && node --check app/api/health/route.mjs && node --check app/api/engine/route.mjs && node --check components/model-controls.mjs && node --check app/api/models/route.mjs && node --check components/project-explorer.mjs"
   },
   "dependencies": {
     "next": "^15.5.0",
