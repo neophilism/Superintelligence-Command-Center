@@ -22,3 +22,19 @@
 @media(max-width:740px){.launcher-scrim{padding:18px 8px}.launcher-dialog{max-height:92vh;padding:14px}.launcher-trigger{width:100%;justify-content:space-between}}
 
 .command-header-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+.model-controls{background:#1d2936;border:1px solid #435568;border-radius:5px;color:#e2ebf4;padding:18px;margin:0 0 24px}
+.model-controls-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.model-controls-heading h2{font-size:1.05rem;margin:0}.model-controls-heading span{font-size:.78rem;color:#bfd5e5}
+.model-controls-options{display:flex;gap:16px;flex-wrap:wrap;margin:13px 0}
+.model-controls-options label{display:flex;align-items:center;gap:9px;font-size:.85rem}
+.model-controls-options select{border:1px solid #607184;background:#131f2b;color:#fff;border-radius:3px;padding:7px 9px}
+.model-controls-note,.model-controls-empty{font-size:.79rem;line-height:1.5;color:#c0d1df}
+.model-list{padding:0;list-style:none;max-height:280px;overflow:auto}
+.model-list li{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 6px;border-bottom:1px solid #364a59}
+.model-list li div{display:flex;flex:1;min-width:190px;flex-direction:column;gap:3px}
+.model-list li span,.model-list li small{font-size:.73rem;color:#b1c7d8}
+.model-list button{background:#293a49;border:1px solid #658297;color:#e2f1fa;border-radius:3px;padding:8px 10px;cursor:pointer}
+.model-comparison{width:100%;font-size:.75rem;border-collapse:collapse;margin-top:15px}
+.model-comparison th,.model-comparison td{border:1px solid #506072;padding:7px;text-align:left}
+.model-controls button:focus-visible,.model-controls select:focus-visible{outline:3px solid #72b7e5;outline-offset:3px}

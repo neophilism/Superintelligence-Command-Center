@@ -2,6 +2,7 @@
 import React,{useEffect,useState} from 'react';
 import {WorkspaceShell,ToolPanel,DomainTool,WORKSPACE_DOMAINS} from '@superintelligence/ui';
 import CommandPalette from '../components/command-palette.mjs';
+import ModelControls from '../components/model-controls.mjs';
 const names={code:'Code',music:'Music',poetry:'Poetry','persuasive-writing':'Persuasive writing',research:'Research',legislation:'Legislation',image:'Images',video:'Film & video',voice:'Voice',data:'Data',workflow:'Workflows'};
 const controls=[{id:'objective',kind:'textarea',label:'Project objective',description:'Define what you want to accomplish. External AI execution is unavailable until an authorized provider and spending controls are connected.',rows:5}];
 export default function Page(){
@@ -24,6 +25,7 @@ export default function Page(){
        ...WORKSPACE_DOMAINS.map(domain=>React.createElement('button',{key:domain,type:'button','aria-current':active===domain?'page':undefined,'data-domain-option':domain,className:active===domain?'nav-link active':'nav-link',onClick:()=>{setActive(domain);setMessage('')}},names[domain]))),
      React.createElement('main',{id:'main',className:'app-main',tabIndex:-1},
        React.createElement('div',{className:'hero'},React.createElement('p',{className:'eyebrow'},"AI COMMAND WORKSPACE"),React.createElement('h1',null,"Everything you create, in one place"),React.createElement('p',null,"Choose a domain. The workspace interface is shared with Academy, without instructional overlays or courseware.")),
+       React.createElement(ModelControls,{domain:active}),
        React.createElement(WorkspaceShell,{product:"command",domain:active,title:names[active]},
          React.createElement(ToolPanel,{title:'Prepare your work'},
            React.createElement('p',{className:'status-note'},engine.status==='connected'?'The engine is reachable. Provider operations must be verified separately.':'AI generation is not available in this workspace yet. Your input stays in this browser session until a project storage service is enabled.'),
