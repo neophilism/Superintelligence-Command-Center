@@ -174,7 +174,9 @@
         "Pinned provider is honored or refused explicitly, never silently changed.",
         "A commercial-rights restriction rules out incompatible media provider."
       ],
-      "pullRequests": []
+      "pullRequests": [
+        5
+      ]
     },
     {
       "id": "SCC-009",
