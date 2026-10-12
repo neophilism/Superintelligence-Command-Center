@@ -111,7 +111,9 @@
         "User launches every enabled workspace without provider-site navigation.",
         "Revoked/unavailable capability is hidden or disabled with reason."
       ],
-      "pullRequests": []
+      "pullRequests": [
+        4
+      ]
     },
     {
       "id": "SCC-006",
