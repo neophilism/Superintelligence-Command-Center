@@ -92,7 +92,10 @@
         "Open, search and inspect large multi-artifact project quickly.",
         "User cannot navigate into another organization's hidden artifacts."
       ],
-      "pullRequests": []
+      "pullRequests": [
+        7,
+        8
+      ]
     },
     {
       "id": "SCC-005",
