@@ -50,7 +50,7 @@ export default function ProjectExplorer({engineOrigin='',onOpenProject=()=>{}}){
  selected?h(React.Fragment,null,h('h3',null,selected.title),h('p',null,'Project '+selected.id+' · revision '+selected.revision),
  h('form',{className:'professional-explorer-editor',onSubmit:saveMetadata,'aria-label':'Edit project metadata'},
  h('label',null,'Project title',h('input',{value:editTitle,maxLength:256,required:true,onChange:e=>setEditTitle(e.target.value)})),
- h('label',null,'Workspace type',h('select',{value:editKind,onChange:e=>setEditKind(e.target.value)},...WORKSPACE_DOMAINS.map(kind=>h('option',{key:kind,value:kind},kind))),
+ h('label',null,'Workspace type',h('select',{value:editKind,onChange:e=>setEditKind(e.target.value)},...WORKSPACE_DOMAINS.map(kind=>h('option',{key:kind,value:kind},kind)))),
  h('button',{type:'submit',disabled:saving||!editTitle.trim()},saving?'Saving…':'Save metadata')),
  h('h4',null,'Artifacts'),
  ...artifacts.map(a=>h('button',{key:a.id,type:'button',onClick:()=>setArtifact(a.id),'aria-current':artifact===a.id?'true':undefined},a.mediaType+' · '+a.id)),
