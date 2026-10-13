@@ -14,4 +14,6 @@ Project title and workspace-type edits carry the exact selected revision. A stal
 
 Pinned project views are stored only in same-origin browser storage, under a tenant-specific key. They contain bounded project identifiers, never project content, titles, credentials or authorization decisions. Pins organize projects that the authenticated Engine response already exposed; they cannot reveal a hidden project. Bulk selection likewise operates only on IDs in the current tenant-scoped result set and does not perform a server mutation.
 
-Portable tests cover persistence parsing, deterministic pin order and visible-result selection. Live multi-organization browser acceptance, keyboard and screen-reader review, large-project performance measurements and deployment evidence remain required before SCC-004 can be called complete.
+Portable tests cover persistence parsing, deterministic pin order, visible-result selection, and keyboard index behavior. Project buttons support wrapping Arrow Up/Down traversal, Home/End, and ten-item Page Up/Down jumps without changing the selected project until activation. A deterministic 10,000-project search and pinned-order benchmark must complete within one second in hosted Node CI; this guards algorithmic regressions but does not substitute for browser rendering measurements.
+
+Live multi-organization denial tests, screen-reader and manual keyboard acceptance, large-project browser rendering measurements, and deployment evidence remain required before SCC-004 can be called complete.
