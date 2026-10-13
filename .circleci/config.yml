@@ -1,0 +1,30 @@
+version: 2.1
+jobs:
+  full-source-verification:
+    docker:
+      - image: cimg/node:22.20.0
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Restore pinned shared-engine submodule
+          command: git submodule update --init --recursive
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+  security-status-record:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: E2EESA status integrity (not certification)
+          command: python3 scripts/validate_e2eesa_status.py
+
+workflows:
+  complete-ci:
+    jobs:
+      - full-source-verification
+      - security-status-record
