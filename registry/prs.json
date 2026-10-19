@@ -11,10 +11,7 @@
       "id": "SCC-001",
       "title": "Initialize independent Command Center app, CI and deployment",
       "origin": "original",
-      "dependsOn": [
-        "SIE-002",
-        "SIE-008"
-      ],
+      "dependsOn": [],
       "scope": [
         "Initialize independent Command Center app with strict SDK/package version pinning.",
         "Configure build, lint, tests, preview/release and environment validation.",
@@ -28,7 +25,16 @@
       "prs": [
         1
       ],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-002"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-008"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -36,9 +42,7 @@
       "title": "Professional design theme and common tool renderer",
       "origin": "original",
       "dependsOn": [
-        "SCC-001",
-        "SIE-008",
-        "SIE-009"
+        "SCC-001"
       ],
       "scope": [
         "Define compact professional tokens with restrained 4-6px radii, stronger density and consistent controls.",
@@ -53,7 +57,16 @@
       "prs": [
         2
       ],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-008"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-009"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -61,10 +74,7 @@
       "title": "Shared identity, projects and entitlement validation",
       "origin": "original",
       "dependsOn": [
-        "SCC-001",
-        "SIE-003",
-        "SIE-004",
-        "SIE-007"
+        "SCC-001"
       ],
       "scope": [
         "Implement shared account, organization selection, entitlements and safe app switching.",
@@ -79,7 +89,20 @@
       "prs": [
         6
       ],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-003"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-004"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-007"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -87,8 +110,7 @@
       "title": "Dense project explorer, history and artifact inspector",
       "origin": "original",
       "dependsOn": [
-        "SCC-003",
-        "SIE-007"
+        "SCC-003"
       ],
       "scope": [
         "Build dense persistent project navigator with history, file/artifact tree and search.",
@@ -106,7 +128,12 @@
         11,
         12
       ],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-007"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -114,9 +141,7 @@
       "title": "Searchable tool launcher, favorites and keyboard command palette",
       "origin": "original",
       "dependsOn": [
-        "SCC-002",
-        "SIE-009",
-        "SIE-010"
+        "SCC-002"
       ],
       "scope": [
         "Implement universal command palette, tool search, favorites and recents.",
@@ -131,7 +156,16 @@
       "prs": [
         4
       ],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-009"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-010"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -161,8 +195,7 @@
       "title": "Unified job tray, background status and reattach",
       "origin": "original",
       "dependsOn": [
-        "SCC-003",
-        "SIE-017"
+        "SCC-003"
       ],
       "scope": [
         "Build global concurrent run tray for pending/running/approved/completed operations.",
@@ -175,7 +208,12 @@
         "Cancelled/failed job status matches worker state rather than optimistic UI."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-017"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -183,9 +221,7 @@
       "title": "Power model selection, comparisons and routing policy",
       "origin": "original",
       "dependsOn": [
-        "SCC-005",
-        "SIE-010",
-        "SIE-014"
+        "SCC-005"
       ],
       "scope": [
         "Create advanced model selection with capability filters, vendor-specific options and profile presets.",
@@ -200,7 +236,16 @@
       "prs": [
         5
       ],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-010"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-014"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -208,10 +253,7 @@
       "title": "Batch actions and concurrent workflow execution",
       "origin": "original",
       "dependsOn": [
-        "SCC-007",
-        "SIE-014",
-        "SIE-015",
-        "SIE-016"
+        "SCC-007"
       ],
       "scope": [
         "Implement bounded batch submission, concurrency settings and budget previews.",
@@ -224,7 +266,20 @@
         "Parallel jobs cannot bypass spend or rate limits."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-014"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-015"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-016"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -232,10 +287,7 @@
       "title": "Goal templates and output checklist composer",
       "origin": "original",
       "dependsOn": [
-        "SCC-009",
-        "SIE-015",
-        "SIE-023",
-        "SIE-027"
+        "SCC-009"
       ],
       "scope": [
         "Build goal template selector for film, legislation and custom cross-tool deliverable packages.",
@@ -248,7 +300,20 @@
         "Unselected outputs are not generated or billed."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-015"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-023"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-027"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -256,8 +321,7 @@
       "title": "Artifact compare, restore and provenance inspector",
       "origin": "original",
       "dependsOn": [
-        "SCC-004",
-        "SIE-007"
+        "SCC-004"
       ],
       "scope": [
         "Create side-by-side artifact/version diff and revision comparison across supported media.",
@@ -270,7 +334,12 @@
         "Differences and parent/source metadata stay legible for mixed media."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-007"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -278,8 +347,7 @@
       "title": "Saved reusable recipes, presets and project templates",
       "origin": "original",
       "dependsOn": [
-        "SCC-010",
-        "SIE-015"
+        "SCC-010"
       ],
       "scope": [
         "Enable versioned workflow recipes, workspace presets and reusable project starters.",
@@ -292,7 +360,12 @@
         "Deprecated provider or schema produces migration guidance, not silent corruption."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-015"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -300,8 +373,7 @@
       "title": "Team project sharing and permission-scoped collaboration",
       "origin": "original",
       "dependsOn": [
-        "SCC-003",
-        "SIE-004"
+        "SCC-003"
       ],
       "scope": [
         "Build organization member invitation, per-project sharing and artifact permissions UI.",
@@ -314,7 +386,12 @@
         "Artifact-only grant does not expose sibling projects."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-004"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -322,8 +399,7 @@
       "title": "Subscription, usage, credits and BYOK configuration",
       "origin": "original",
       "dependsOn": [
-        "SCC-003",
-        "SIE-014"
+        "SCC-003"
       ],
       "scope": [
         "Implement subscription/credit dashboards and payment-account links using engine entitlements.",
@@ -336,7 +412,12 @@
         "BYOK job remains subject to tool permissions and hard ceilings."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-014"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -345,8 +426,7 @@
       "origin": "original",
       "dependsOn": [
         "SCC-013",
-        "SCC-014",
-        "SIE-004"
+        "SCC-014"
       ],
       "scope": [
         "Add organization seats, admin roles, approval policy and department-level spend caps.",
@@ -359,7 +439,12 @@
         "Org-level cap prevents authorized individual from overspending."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-004"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -367,8 +452,7 @@
       "title": "Data exports, retention controls and support tooling",
       "origin": "original",
       "dependsOn": [
-        "SCC-011",
-        "SIE-007"
+        "SCC-011"
       ],
       "scope": [
         "Create one-click export for sources, generated media, revisions and manifest.",
@@ -381,7 +465,12 @@
         "Deletion processes report completion/exception without misleading users."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-007"
+        }
+      ],
       "externalPrerequisites": []
     },
     {
@@ -437,9 +526,7 @@
         "SCC-003",
         "SCC-014",
         "SCC-017",
-        "SCC-018",
-        "SIA-002",
-        "SIE-039"
+        "SCC-018"
       ],
       "scope": [
         "Deploy Command Center with confirmed source SHA, environment and rollback notes.",
@@ -452,7 +539,16 @@
         "Wrong Render project, stale SHA or incomplete backup prevents sign-off."
       ],
       "prs": [],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Superintelligence-Academy",
+          "unitId": "SIA-002"
+        },
+        {
+          "repository": "neophilism/Superintelligence-Engine",
+          "unitId": "SIE-039"
+        }
+      ],
       "externalPrerequisites": []
     }
   ],
