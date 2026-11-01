@@ -2,6 +2,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {WORKSPACE_DOMAINS} from '@superintelligence/ui';
 import {ProjectPortalClient} from '../vendor/engine/packages/ui/src/project-portal.mjs';
+import ArtifactCompare from './artifact-compare.mjs';
 
 const PIN_LIMIT=500;
 export function searchProjects(projects,query){
@@ -101,6 +102,8 @@ export default function ProjectExplorer({engineOrigin='',onOpenProject=()=>{}}){
  h('button',{type:'submit',disabled:saving||!editTitle.trim()},saving?'Saving…':'Save metadata')),
  h('h4',null,'Artifacts'),
  ...artifacts.map(a=>h('button',{key:a.id,type:'button',onClick:()=>setArtifact(a.id),'aria-current':artifact===a.id?'true':undefined},a.mediaType+' · '+a.id)),
- artifact?h('div',null,h('h4',null,'Immutable revision history'),...versions.map((v,i)=>h('p',{key:String(v.revision)+'-'+i},describeRevision(v)))):null):h('p',null,'Select a project to inspect its artifacts and versions.')))):h('p',null,status==='unconfigured'?'Configure the engine origin to access projects.':status==='signed-out'?'Sign in using the shared project portal.':'Project explorer is currently unavailable.'),
+ artifact?h('div',null,h('h4',null,'Immutable revision history'),
+   ...versions.map((v,i)=>h('p',{key:String(v.revision)+'-'+i},describeRevision(v))),
+   h(ArtifactCompare,{versions,onRestore:null})):null):h('p',null,'Select a project to inspect its artifacts and versions.')))):h('p',null,status==='unconfigured'?'Configure the engine origin to access projects.':status==='signed-out'?'Sign in using the shared project portal.':'Project explorer is currently unavailable.'),
  error?h('p',{role:'alert'},error):null);
 }
