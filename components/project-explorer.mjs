@@ -1,7 +1,8 @@
 "use client";
-import React,{useEffect,useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {WORKSPACE_DOMAINS} from '@superintelligence/ui';
 import {ProjectPortalClient} from '../vendor/engine/packages/ui/src/project-portal.mjs';
+import {readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent,optionalBrowserStorage,inspectorPercentFromPointer} from './workspace-layout.mjs';
 
 const PIN_LIMIT=500;
 export function searchProjects(projects,query){
@@ -43,14 +44,56 @@ export function keyboardProjectIndex(index,key,length){
  return null;
 }
 
-export default function ProjectExplorer({engineOrigin='',onOpenProject=()=>{}}){
+export default function ProjectExplorer({engineOrigin='',domain='research',onOpenProject=()=>{}}){
+ const inspectorPointerActive=useRef(false);
  const client=useMemo(()=>{try{return new ProjectPortalClient({engineOrigin,product:'command'})}catch{return null}},[engineOrigin]);
- const [status,setStatus]=useState(client?'checking':'unconfigured'),[organizations,setOrganizations]=useState([]),[tenant,setTenant]=useState(''),[projects,setProjects]=useState([]),[query,setQuery]=useState(''),[selected,setSelected]=useState(null),[artifacts,setArtifacts]=useState([]),[artifact,setArtifact]=useState(''),[versions,setVersions]=useState([]),[editTitle,setEditTitle]=useState(''),[editKind,setEditKind]=useState('research'),[saving,setSaving]=useState(false),[pinnedIds,setPinnedIds]=useState([]),[selectedIds,setSelectedIds]=useState([]),[pinnedOnly,setPinnedOnly]=useState(false),[error,setError]=useState('');
+ const [status,setStatus]=useState(client?'checking':'unconfigured'),[organizations,setOrganizations]=useState([]),[tenant,setTenant]=useState(''),[projects,setProjects]=useState([]),[query,setQuery]=useState(''),[selected,setSelected]=useState(null),[artifacts,setArtifacts]=useState([]),[artifact,setArtifact]=useState(''),[versions,setVersions]=useState([]),
+ [secondaryArtifact,setSecondaryArtifact]=useState(''),[secondaryVersions,setSecondaryVersions]=useState([]),
+ [inspectorPercent,setInspectorPercent]=useState(50),[editTitle,setEditTitle]=useState(''),[editKind,setEditKind]=useState('research'),[saving,setSaving]=useState(false),[pinnedIds,setPinnedIds]=useState([]),[selectedIds,setSelectedIds]=useState([]),[pinnedOnly,setPinnedOnly]=useState(false),[error,setError]=useState('');
  useEffect(()=>{if(!client){setStatus('unconfigured');return}let live=true;
   client.session().then(()=>client.tenants()).then(data=>{if(!live)return;const items=Array.isArray(data.items)?data.items:[];setOrganizations(items);setTenant(items[0]?.id||'');setStatus('ready');}).catch(e=>{if(live){setStatus(e.status===401?'signed-out':'unavailable')}});return()=>{live=false}},[client]);
+ useEffect(()=>{if(!tenant||typeof window==='undefined'){setInspectorPercent(50);return}
+   const storage=optionalBrowserStorage(window);
+   setInspectorPercent(storage?readInspectorPercent(storage,tenant,domain):50);
+ },[tenant,domain]);
+ function resizeInspector(event){
+   const next=keyboardInspectorPercent(inspectorPercent,event.key,event.shiftKey);
+   if(next===null)return;
+   event.preventDefault();setInspectorPercent(next);
+   if(typeof window!=='undefined'&&tenant&&optionalBrowserStorage(window))
+     saveInspectorPercent(optionalBrowserStorage(window),tenant,domain,next);
+ }
+ function moveInspectorPointer(event){
+   if(!inspectorPointerActive.current)return;
+   const rect=event.currentTarget.parentElement?.getBoundingClientRect();
+   if(!rect)return;
+   setInspectorPercent(inspectorPercentFromPointer(event.clientX,rect.left,rect.width));
+ }
+ function endInspectorPointer(event){
+   if(!inspectorPointerActive.current)return;
+   inspectorPointerActive.current=false;
+   const rect=event.currentTarget.parentElement?.getBoundingClientRect();
+   if(!rect)return;
+   const next=inspectorPercentFromPointer(event.clientX,rect.left,rect.width);
+   setInspectorPercent(next);
+   if(typeof window!=='undefined'&&tenant&&optionalBrowserStorage(window))
+     saveInspectorPercent(optionalBrowserStorage(window),tenant,domain,next);
+ }
+ function resetInspector(){
+   setInspectorPercent(50);
+   if(typeof window!=='undefined'&&tenant&&optionalBrowserStorage(window))
+     saveInspectorPercent(optionalBrowserStorage(window),tenant,domain,50);
+ }
  useEffect(()=>{if(!tenant||!client){setProjects([]);return}let live=true;setSelected(null);setArtifacts([]);setSelectedIds([]);setPinnedOnly(false);if(typeof window!=='undefined')setPinnedIds(readPinnedProjectIds(window.localStorage,tenant));client.projects(tenant).then(data=>{if(live)setProjects(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setError('Project list unavailable');setProjects([])}});return()=>{live=false}},[client,tenant]);
- useEffect(()=>{if(!client||!tenant||!selected){setArtifacts([]);return}let live=true;setArtifact('');setVersions([]);client.artifacts(tenant,selected.id).then(data=>{if(live)setArtifacts(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setArtifacts([]);setError('Artifact list unavailable')}});return()=>{live=false}},[client,tenant,selected]);
+ useEffect(()=>{if(!client||!tenant||!selected){setArtifacts([]);return}let live=true;setArtifact('');setVersions([]);setSecondaryArtifact('');setSecondaryVersions([]);client.artifacts(tenant,selected.id).then(data=>{if(live)setArtifacts(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setArtifacts([]);setError('Artifact list unavailable')}});return()=>{live=false}},[client,tenant,selected]);
  useEffect(()=>{if(!client||!tenant||!selected||!artifact){setVersions([]);return}let live=true;client.revisions(tenant,selected.id,artifact).then(data=>{if(live)setVersions(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setVersions([]);setError('Revision history unavailable')}});return()=>{live=false}},[client,tenant,selected,artifact]);
+ useEffect(()=>{if(!client||!tenant||!selected||!secondaryArtifact){setSecondaryVersions([]);return}
+   let live=true;
+   client.revisions(tenant,selected.id,secondaryArtifact)
+     .then(data=>{if(live)setSecondaryVersions(Array.isArray(data.items)?data.items:[])})
+     .catch(()=>{if(live){setSecondaryVersions([]);setError('Second artifact revision history unavailable')}});
+   return()=>{live=false};
+ },[client,tenant,selected,secondaryArtifact]);
 
  async function saveMetadata(event){
   event.preventDefault();if(!client||!tenant||!selected||saving)return;setSaving(true);setError('');
@@ -101,6 +144,32 @@ export default function ProjectExplorer({engineOrigin='',onOpenProject=()=>{}}){
  h('button',{type:'submit',disabled:saving||!editTitle.trim()},saving?'Saving…':'Save metadata')),
  h('h4',null,'Artifacts'),
  ...artifacts.map(a=>h('button',{key:a.id,type:'button',onClick:()=>setArtifact(a.id),'aria-current':artifact===a.id?'true':undefined},a.mediaType+' · '+a.id)),
- artifact?h('div',null,h('h4',null,'Immutable revision history'),...versions.map((v,i)=>h('p',{key:String(v.revision)+'-'+i},describeRevision(v)))):null):h('p',null,'Select a project to inspect its artifacts and versions.')))):h('p',null,status==='unconfigured'?'Configure the engine origin to access projects.':status==='signed-out'?'Sign in using the shared project portal.':'Project explorer is currently unavailable.'),
+ h('div',{className:'professional-inspector-split','aria-label':'Two artifact inspectors',
+   style:{'--inspector-left':inspectorPercent+'%'}},
+   h('section',{'aria-label':'Primary artifact inspector',className:'professional-inspector'},
+     h('h4',null,'Primary inspector'),
+     artifact?h('div',null,h('p',null,'Artifact '+artifact),
+       ...versions.map((v,i)=>h('p',{key:String(v.revision)+'-'+i},describeRevision(v))))
+       :h('p',null,'Choose an artifact above.')),
+   h('div',{className:'professional-inspector-divider',role:'separator',tabIndex:0,
+      'aria-label':'Resize artifact inspectors','aria-orientation':'vertical',
+      'aria-valuemin':30,'aria-valuemax':70,'aria-valuenow':inspectorPercent,
+      onKeyDown:resizeInspector,
+      onPointerDown:event=>{if(event.button!==0)return;inspectorPointerActive.current=true;event.currentTarget.setPointerCapture?.(event.pointerId)},
+      onPointerMove:moveInspectorPointer,onPointerUp:endInspectorPointer,
+      onPointerCancel:()=>{inspectorPointerActive.current=false},title:'Use arrow keys or Home and End to resize'}),
+   h('section',{'aria-label':'Secondary artifact inspector',className:'professional-inspector'},
+     h('h4',null,'Secondary inspector'),
+     h('label',null,'Choose another artifact',
+       h('select',{'aria-label':'Second artifact to inspect',value:secondaryArtifact,
+         onChange:e=>setSecondaryArtifact(e.target.value)},
+         h('option',{value:''},'None'),
+         ...artifacts.map(a=>h('option',{key:a.id,value:a.id},a.mediaType+' · '+a.id)))),
+     secondaryArtifact?h('div',null,h('p',null,'Artifact '+secondaryArtifact),
+       ...secondaryVersions.map((v,i)=>h('p',{key:String(v.revision)+'-'+i},describeRevision(v))))
+       :h('p',null,'No second artifact selected.'))),
+   h('button',{type:'button',className:'reset-inspector',onClick:resetInspector},
+     'Reset inspector split')
+   ):h('p',null,'Select a project to inspect its artifacts and versions.')))):h('p',null,status==='unconfigured'?'Configure the engine origin to access projects.':status==='signed-out'?'Sign in using the shared project portal.':'Project explorer is currently unavailable.'),
  error?h('p',{role:'alert'},error):null);
 }

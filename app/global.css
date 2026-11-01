@@ -38,3 +38,16 @@
 .model-comparison{width:100%;font-size:.75rem;border-collapse:collapse;margin-top:15px}
 .model-comparison th,.model-comparison td{border:1px solid #506072;padding:7px;text-align:left}
 .model-controls button:focus-visible,.model-controls select:focus-visible{outline:3px solid #72b7e5;outline-offset:3px}
+
+/* SCC-006: keyboard-accessible, per-domain browser-profile layout preference. */
+.app-columns{grid-template-columns:var(--workspace-nav-width,205px) 8px minmax(0,1fr)}
+.workspace-divider{background:#243a4d;border-inline:1px solid #56748b;cursor:col-resize;min-width:8px}
+.workspace-divider:focus-visible{outline:3px solid #8ed7ff;outline-offset:-3px;z-index:2}
+.reset-layout{margin:14px 10px 2px;width:calc(100% - 20px);padding:9px 6px;
+ background:#263b50;border:1px solid #67839d;border-radius:4px;color:#fff;cursor:pointer}
+.reset-layout:focus-visible{outline:3px solid #8ed7ff;outline-offset:2px}
+@media(max-width:740px){
+ .app-columns{display:block!important}
+ .workspace-divider{display:none}
+ .reset-layout{width:auto;white-space:nowrap;margin:0 4px;padding:8px}
+}
