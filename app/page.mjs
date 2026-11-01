@@ -4,7 +4,7 @@ import {WorkspaceShell,ToolPanel,DomainTool,WORKSPACE_DOMAINS,ProjectPortal} fro
 import CommandPalette from '../components/command-palette.mjs';
 import ModelControls from '../components/model-controls.mjs';
 import ProjectExplorer from '../components/project-explorer.mjs';
-import {DEFAULT_NAV_WIDTH,MIN_NAV_WIDTH,MAX_NAV_WIDTH,readNavWidth,saveNavWidth,keyboardNavWidth} from '../components/workspace-layout.mjs';
+import {DEFAULT_NAV_WIDTH,MIN_NAV_WIDTH,MAX_NAV_WIDTH,readNavWidth,saveNavWidth,keyboardNavWidth,optionalBrowserStorage} from '../components/workspace-layout.mjs';
 const names={code:'Code',music:'Music',poetry:'Poetry','persuasive-writing':'Persuasive writing',research:'Research',legislation:'Legislation',image:'Images',video:'Film & video',voice:'Voice',data:'Data',workflow:'Workflows'};
 const controls=[{id:'objective',kind:'textarea',label:'Project objective',description:'Define what you want to accomplish. External AI execution is unavailable until an authorized provider and spending controls are connected.',rows:5}];
 export default function Page(){
@@ -13,16 +13,19 @@ export default function Page(){
  const [drafts,setDrafts]=useState({});
  const [message,setMessage]=useState('');
  const [navWidth,setNavWidth]=useState(DEFAULT_NAV_WIDTH);
- useEffect(()=>{if(typeof window!=='undefined')setNavWidth(readNavWidth(window.localStorage,active));},[active]);
+ useEffect(()=>{if(typeof window!=='undefined'){
+   const storage=optionalBrowserStorage(window);if(storage)setNavWidth(readNavWidth(storage,active));
+   else setNavWidth(DEFAULT_NAV_WIDTH);
+ }},[active]);
  function onResizeNavigation(event){
    const next=keyboardNavWidth(navWidth,event.key,event.shiftKey);
    if(next===null)return;
    event.preventDefault();setNavWidth(next);
-   if(typeof window!=='undefined')saveNavWidth(window.localStorage,active,next);
+   if(typeof window!=='undefined'&&optionalBrowserStorage(window))saveNavWidth(optionalBrowserStorage(window),active,next);
  }
  function resetNavigation(){
    setNavWidth(DEFAULT_NAV_WIDTH);
-   if(typeof window!=='undefined')saveNavWidth(window.localStorage,active,DEFAULT_NAV_WIDTH);
+   if(typeof window!=='undefined'&&optionalBrowserStorage(window))saveNavWidth(optionalBrowserStorage(window),active,DEFAULT_NAV_WIDTH);
  }
  useEffect(()=>{let mounted=true;fetch('/api/engine',{cache:'no-store'}).then(res=>res.json()).then(data=>{if(mounted)setEngine(data)}).catch(()=>{if(mounted)setEngine({status:'unavailable'})});return()=>{mounted=false}},[]);
  const change=(id,value)=>{setDrafts(prev=>({...prev,[active]:value}));setMessage('')};

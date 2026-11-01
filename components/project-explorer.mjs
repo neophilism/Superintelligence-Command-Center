@@ -2,7 +2,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {WORKSPACE_DOMAINS} from '@superintelligence/ui';
 import {ProjectPortalClient} from '../vendor/engine/packages/ui/src/project-portal.mjs';
-import {readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent} from './workspace-layout.mjs';
+import {readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent,optionalBrowserStorage} from './workspace-layout.mjs';
 
 const PIN_LIMIT=500;
 export function searchProjects(projects,query){
@@ -52,19 +52,20 @@ export default function ProjectExplorer({engineOrigin='',domain='research',onOpe
  useEffect(()=>{if(!client){setStatus('unconfigured');return}let live=true;
   client.session().then(()=>client.tenants()).then(data=>{if(!live)return;const items=Array.isArray(data.items)?data.items:[];setOrganizations(items);setTenant(items[0]?.id||'');setStatus('ready');}).catch(e=>{if(live){setStatus(e.status===401?'signed-out':'unavailable')}});return()=>{live=false}},[client]);
  useEffect(()=>{if(!tenant||typeof window==='undefined'){setInspectorPercent(50);return}
-   setInspectorPercent(readInspectorPercent(window.localStorage,tenant,domain));
+   const storage=optionalBrowserStorage(window);
+   setInspectorPercent(storage?readInspectorPercent(storage,tenant,domain):50);
  },[tenant,domain]);
  function resizeInspector(event){
    const next=keyboardInspectorPercent(inspectorPercent,event.key,event.shiftKey);
    if(next===null)return;
    event.preventDefault();setInspectorPercent(next);
-   if(typeof window!=='undefined'&&tenant)
-     saveInspectorPercent(window.localStorage,tenant,domain,next);
+   if(typeof window!=='undefined'&&tenant&&optionalBrowserStorage(window))
+     saveInspectorPercent(optionalBrowserStorage(window),tenant,domain,next);
  }
  function resetInspector(){
    setInspectorPercent(50);
-   if(typeof window!=='undefined'&&tenant)
-     saveInspectorPercent(window.localStorage,tenant,domain,50);
+   if(typeof window!=='undefined'&&tenant&&optionalBrowserStorage(window))
+     saveInspectorPercent(optionalBrowserStorage(window),tenant,domain,50);
  }
  useEffect(()=>{if(!tenant||!client){setProjects([]);return}let live=true;setSelected(null);setArtifacts([]);setSelectedIds([]);setPinnedOnly(false);if(typeof window!=='undefined')setPinnedIds(readPinnedProjectIds(window.localStorage,tenant));client.projects(tenant).then(data=>{if(live)setProjects(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setError('Project list unavailable');setProjects([])}});return()=>{live=false}},[client,tenant]);
  useEffect(()=>{if(!client||!tenant||!selected){setArtifacts([]);return}let live=true;setArtifact('');setVersions([]);setSecondaryArtifact('');setSecondaryVersions([]);client.artifacts(tenant,selected.id).then(data=>{if(live)setArtifacts(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setArtifacts([]);setError('Artifact list unavailable')}});return()=>{live=false}},[client,tenant,selected]);

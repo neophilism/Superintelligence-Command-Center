@@ -58,3 +58,9 @@ export function saveInspectorPercent(storage,tenant,domain,width){
  try{storage.setItem(inspectorStorageKey(tenant,domain),JSON.stringify(next));}catch{}
  return next;
 }
+
+/** Browser storage can be inaccessible even when window exists (privacy mode,
+ * disabled cookies or sandboxed frames). UI must still be navigable. */
+export function optionalBrowserStorage(browser){
+ try{return browser?.localStorage??null;}catch{return null;}
+}

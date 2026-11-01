@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DEFAULT_NAV_WIDTH,MIN_NAV_WIDTH,MAX_NAV_WIDTH,layoutStorageKey,
  readNavWidth,saveNavWidth,keyboardNavWidth,
- inspectorStorageKey,readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent
+ inspectorStorageKey,readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent,optionalBrowserStorage
 } from '../components/workspace-layout.mjs';
 function storage(){const values=new Map();return {
  getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)
@@ -64,4 +64,11 @@ test('inspector splitter is keyboard bounded and rejects corrupt/denied storage'
  assert.equal(saveInspectorPercent(store,'org','data',500),70);
  assert.equal(readInspectorPercent(store,'org','data'),70);
  assert.throws(()=>inspectorStorageKey('','music'),/tenant/);
+});
+
+test('browser getter throwing privacy exception never breaks workspace rendering',()=>{
+ const browser={get localStorage(){throw Error('SecurityError')}};
+ assert.equal(optionalBrowserStorage(browser),null);
+ assert.equal(optionalBrowserStorage({localStorage:storage()}).getItem('key'),null);
+ assert.equal(optionalBrowserStorage(null),null);
 });
