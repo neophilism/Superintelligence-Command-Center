@@ -4,6 +4,7 @@ import {WorkspaceShell,ToolPanel,DomainTool,WORKSPACE_DOMAINS,ProjectPortal} fro
 import CommandPalette from '../components/command-palette.mjs';
 import ModelControls from '../components/model-controls.mjs';
 import ProjectExplorer from '../components/project-explorer.mjs';
+import {DEFAULT_NAV_WIDTH,MIN_NAV_WIDTH,MAX_NAV_WIDTH,readNavWidth,saveNavWidth,keyboardNavWidth} from '../components/workspace-layout.mjs';
 const names={code:'Code',music:'Music',poetry:'Poetry','persuasive-writing':'Persuasive writing',research:'Research',legislation:'Legislation',image:'Images',video:'Film & video',voice:'Voice',data:'Data',workflow:'Workflows'};
 const controls=[{id:'objective',kind:'textarea',label:'Project objective',description:'Define what you want to accomplish. External AI execution is unavailable until an authorized provider and spending controls are connected.',rows:5}];
 export default function Page(){
@@ -11,6 +12,18 @@ export default function Page(){
  const [active,setActive]=useState('research');
  const [drafts,setDrafts]=useState({});
  const [message,setMessage]=useState('');
+ const [navWidth,setNavWidth]=useState(DEFAULT_NAV_WIDTH);
+ useEffect(()=>{if(typeof window!=='undefined')setNavWidth(readNavWidth(window.localStorage,active));},[active]);
+ function onResizeNavigation(event){
+   const next=keyboardNavWidth(navWidth,event.key,event.shiftKey);
+   if(next===null)return;
+   event.preventDefault();setNavWidth(next);
+   if(typeof window!=='undefined')saveNavWidth(window.localStorage,active,next);
+ }
+ function resetNavigation(){
+   setNavWidth(DEFAULT_NAV_WIDTH);
+   if(typeof window!=='undefined')saveNavWidth(window.localStorage,active,DEFAULT_NAV_WIDTH);
+ }
  useEffect(()=>{let mounted=true;fetch('/api/engine',{cache:'no-store'}).then(res=>res.json()).then(data=>{if(mounted)setEngine(data)}).catch(()=>{if(mounted)setEngine({status:'unavailable'})});return()=>{mounted=false}},[]);
  const change=(id,value)=>{setDrafts(prev=>({...prev,[active]:value}));setMessage('')};
  return React.createElement('div',{className:'app-frame'},
@@ -20,10 +33,16 @@ export default function Page(){
      React.createElement('div',{className:'command-header-tools'},
        React.createElement(CommandPalette,{active,onChoose:domain=>{setActive(domain);setMessage('')}}),
        React.createElement('span',{className:'connection-status',role:'status','aria-live':'polite'},'Engine: '+engine.status))),
-   React.createElement('div',{className:'app-columns'},
+   React.createElement('div',{className:'app-columns',style:{'--workspace-nav-width':navWidth+'px'}},
      React.createElement('nav',{'aria-label':'AI workspaces',className:'app-nav'},
        React.createElement('div',{className:'nav-heading'},'Workspaces'),
-       ...WORKSPACE_DOMAINS.map(domain=>React.createElement('button',{key:domain,type:'button','aria-current':active===domain?'page':undefined,'data-domain-option':domain,className:active===domain?'nav-link active':'nav-link',onClick:()=>{setActive(domain);setMessage('')}},names[domain]))),
+       ...WORKSPACE_DOMAINS.map(domain=>React.createElement('button',{key:domain,type:'button','aria-current':active===domain?'page':undefined,'data-domain-option':domain,className:active===domain?'nav-link active':'nav-link',onClick:()=>{setActive(domain);setMessage('')}},names[domain])),
+       React.createElement('button',{type:'button',className:'reset-layout',onClick:resetNavigation},'Reset navigation width')),
+     React.createElement('div',{className:'workspace-divider',role:'separator',tabIndex:0,
+       'aria-label':'Resize workspace navigation','aria-orientation':'vertical',
+       'aria-valuemin':MIN_NAV_WIDTH,'aria-valuemax':MAX_NAV_WIDTH,'aria-valuenow':navWidth,
+       'aria-valuetext':navWidth+' pixels',onKeyDown:onResizeNavigation,
+       title:'Use left and right arrow keys to resize; Home and End choose extremes'}),
      React.createElement('main',{id:'main',className:'app-main',tabIndex:-1},
        React.createElement('div',{className:'hero'},React.createElement('p',{className:'eyebrow'},"AI COMMAND WORKSPACE"),React.createElement('h1',null,"Everything you create, in one place"),React.createElement('p',null,"Choose a domain. The workspace interface is shared with Academy, without instructional overlays or courseware.")),
        React.createElement(ProjectPortal,{product:"command",domain:active,engineOrigin:process.env.NEXT_PUBLIC_ENGINE_ORIGIN||'',companionOrigin:process.env.NEXT_PUBLIC_ACADEMY_ORIGIN||'',onOpenProject:project=>{if(WORKSPACE_DOMAINS.includes(project.kind))setActive(project.kind);setMessage('')}}),
