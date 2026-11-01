@@ -1,8 +1,8 @@
 "use client";
-import React,{useEffect,useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {WORKSPACE_DOMAINS} from '@superintelligence/ui';
 import {ProjectPortalClient} from '../vendor/engine/packages/ui/src/project-portal.mjs';
-import {readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent,optionalBrowserStorage} from './workspace-layout.mjs';
+import {readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent,optionalBrowserStorage,inspectorPercentFromPointer} from './workspace-layout.mjs';
 
 const PIN_LIMIT=500;
 export function searchProjects(projects,query){
@@ -45,6 +45,7 @@ export function keyboardProjectIndex(index,key,length){
 }
 
 export default function ProjectExplorer({engineOrigin='',domain='research',onOpenProject=()=>{}}){
+ const inspectorPointerActive=useRef(false);
  const client=useMemo(()=>{try{return new ProjectPortalClient({engineOrigin,product:'command'})}catch{return null}},[engineOrigin]);
  const [status,setStatus]=useState(client?'checking':'unconfigured'),[organizations,setOrganizations]=useState([]),[tenant,setTenant]=useState(''),[projects,setProjects]=useState([]),[query,setQuery]=useState(''),[selected,setSelected]=useState(null),[artifacts,setArtifacts]=useState([]),[artifact,setArtifact]=useState(''),[versions,setVersions]=useState([]),
  [secondaryArtifact,setSecondaryArtifact]=useState(''),[secondaryVersions,setSecondaryVersions]=useState([]),
@@ -59,6 +60,22 @@ export default function ProjectExplorer({engineOrigin='',domain='research',onOpe
    const next=keyboardInspectorPercent(inspectorPercent,event.key,event.shiftKey);
    if(next===null)return;
    event.preventDefault();setInspectorPercent(next);
+   if(typeof window!=='undefined'&&tenant&&optionalBrowserStorage(window))
+     saveInspectorPercent(optionalBrowserStorage(window),tenant,domain,next);
+ }
+ function moveInspectorPointer(event){
+   if(!inspectorPointerActive.current)return;
+   const rect=event.currentTarget.parentElement?.getBoundingClientRect();
+   if(!rect)return;
+   setInspectorPercent(inspectorPercentFromPointer(event.clientX,rect.left,rect.width));
+ }
+ function endInspectorPointer(event){
+   if(!inspectorPointerActive.current)return;
+   inspectorPointerActive.current=false;
+   const rect=event.currentTarget.parentElement?.getBoundingClientRect();
+   if(!rect)return;
+   const next=inspectorPercentFromPointer(event.clientX,rect.left,rect.width);
+   setInspectorPercent(next);
    if(typeof window!=='undefined'&&tenant&&optionalBrowserStorage(window))
      saveInspectorPercent(optionalBrowserStorage(window),tenant,domain,next);
  }
@@ -137,7 +154,10 @@ export default function ProjectExplorer({engineOrigin='',domain='research',onOpe
    h('div',{className:'professional-inspector-divider',role:'separator',tabIndex:0,
       'aria-label':'Resize artifact inspectors','aria-orientation':'vertical',
       'aria-valuemin':30,'aria-valuemax':70,'aria-valuenow':inspectorPercent,
-      onKeyDown:resizeInspector,title:'Use arrow keys or Home and End to resize'}),
+      onKeyDown:resizeInspector,
+      onPointerDown:event=>{if(event.button!==0)return;inspectorPointerActive.current=true;event.currentTarget.setPointerCapture?.(event.pointerId)},
+      onPointerMove:moveInspectorPointer,onPointerUp:endInspectorPointer,
+      onPointerCancel:()=>{inspectorPointerActive.current=false},title:'Use arrow keys or Home and End to resize'}),
    h('section',{'aria-label':'Secondary artifact inspector',className:'professional-inspector'},
      h('h4',null,'Secondary inspector'),
      h('label',null,'Choose another artifact',

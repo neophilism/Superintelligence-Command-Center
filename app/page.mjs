@@ -1,10 +1,10 @@
 "use client";
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import {WorkspaceShell,ToolPanel,DomainTool,WORKSPACE_DOMAINS,ProjectPortal} from '@superintelligence/ui';
 import CommandPalette from '../components/command-palette.mjs';
 import ModelControls from '../components/model-controls.mjs';
 import ProjectExplorer from '../components/project-explorer.mjs';
-import {DEFAULT_NAV_WIDTH,MIN_NAV_WIDTH,MAX_NAV_WIDTH,readNavWidth,saveNavWidth,keyboardNavWidth,optionalBrowserStorage} from '../components/workspace-layout.mjs';
+import {DEFAULT_NAV_WIDTH,MIN_NAV_WIDTH,MAX_NAV_WIDTH,readNavWidth,saveNavWidth,keyboardNavWidth,optionalBrowserStorage,navWidthFromPointer} from '../components/workspace-layout.mjs';
 const names={code:'Code',music:'Music',poetry:'Poetry','persuasive-writing':'Persuasive writing',research:'Research',legislation:'Legislation',image:'Images',video:'Film & video',voice:'Voice',data:'Data',workflow:'Workflows'};
 const controls=[{id:'objective',kind:'textarea',label:'Project objective',description:'Define what you want to accomplish. External AI execution is unavailable until an authorized provider and spending controls are connected.',rows:5}];
 export default function Page(){
@@ -13,6 +13,7 @@ export default function Page(){
  const [drafts,setDrafts]=useState({});
  const [message,setMessage]=useState('');
  const [navWidth,setNavWidth]=useState(DEFAULT_NAV_WIDTH);
+ const navPointerActive=useRef(false);
  useEffect(()=>{if(typeof window!=='undefined'){
    const storage=optionalBrowserStorage(window);if(storage)setNavWidth(readNavWidth(storage,active));
    else setNavWidth(DEFAULT_NAV_WIDTH);
@@ -22,6 +23,22 @@ export default function Page(){
    if(next===null)return;
    event.preventDefault();setNavWidth(next);
    if(typeof window!=='undefined'&&optionalBrowserStorage(window))saveNavWidth(optionalBrowserStorage(window),active,next);
+ }
+ function resizeNavigationPointer(event){
+   if(!navPointerActive.current)return;
+   const rect=event.currentTarget.parentElement?.getBoundingClientRect();
+   if(!rect)return;
+   setNavWidth(navWidthFromPointer(event.clientX,rect.left));
+ }
+ function endNavigationPointer(event){
+   if(!navPointerActive.current)return;
+   navPointerActive.current=false;
+   const rect=event.currentTarget.parentElement?.getBoundingClientRect();
+   if(!rect)return;
+   const next=navWidthFromPointer(event.clientX,rect.left);
+   setNavWidth(next);
+   if(typeof window!=='undefined'&&optionalBrowserStorage(window))
+     saveNavWidth(optionalBrowserStorage(window),active,next);
  }
  function resetNavigation(){
    setNavWidth(DEFAULT_NAV_WIDTH);
@@ -45,6 +62,10 @@ export default function Page(){
        'aria-label':'Resize workspace navigation','aria-orientation':'vertical',
        'aria-valuemin':MIN_NAV_WIDTH,'aria-valuemax':MAX_NAV_WIDTH,'aria-valuenow':navWidth,
        'aria-valuetext':navWidth+' pixels',onKeyDown:onResizeNavigation,
+       onPointerDown:event=>{if(event.button!==0)return;navPointerActive.current=true;event.currentTarget.setPointerCapture?.(event.pointerId)},
+       onPointerMove:resizeNavigationPointer,
+       onPointerUp:endNavigationPointer,
+       onPointerCancel:()=>{navPointerActive.current=false},
        title:'Use left and right arrow keys to resize; Home and End choose extremes'}),
      React.createElement('main',{id:'main',className:'app-main',tabIndex:-1},
        React.createElement('div',{className:'hero'},React.createElement('p',{className:'eyebrow'},"AI COMMAND WORKSPACE"),React.createElement('h1',null,"Everything you create, in one place"),React.createElement('p',null,"Choose a domain. The workspace interface is shared with Academy, without instructional overlays or courseware.")),

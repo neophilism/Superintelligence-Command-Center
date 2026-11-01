@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DEFAULT_NAV_WIDTH,MIN_NAV_WIDTH,MAX_NAV_WIDTH,layoutStorageKey,
  readNavWidth,saveNavWidth,keyboardNavWidth,
- inspectorStorageKey,readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent,optionalBrowserStorage
+ inspectorStorageKey,readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent,optionalBrowserStorage,navWidthFromPointer,inspectorPercentFromPointer
 } from '../components/workspace-layout.mjs';
 function storage(){const values=new Map();return {
  getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)
@@ -71,4 +71,14 @@ test('browser getter throwing privacy exception never breaks workspace rendering
  assert.equal(optionalBrowserStorage(browser),null);
  assert.equal(optionalBrowserStorage({localStorage:storage()}).getItem('key'),null);
  assert.equal(optionalBrowserStorage(null),null);
+});
+
+test('pointer resizing respects nav bounds and inspector fraction',()=>{
+ assert.equal(navWidthFromPointer(290,100),190);
+ assert.equal(navWidthFromPointer(10,100),MIN_NAV_WIDTH);
+ assert.equal(navWidthFromPointer(800,100),MAX_NAV_WIDTH);
+ assert.equal(inspectorPercentFromPointer(370,100,600),45);
+ assert.equal(inspectorPercentFromPointer(100,100,600),30);
+ assert.equal(inspectorPercentFromPointer(1000,100,600),70);
+ assert.equal(inspectorPercentFromPointer(NaN,100,600),50);
 });

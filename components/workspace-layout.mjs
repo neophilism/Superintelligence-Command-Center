@@ -64,3 +64,13 @@ export function saveInspectorPercent(storage,tenant,domain,width){
 export function optionalBrowserStorage(browser){
  try{return browser?.localStorage??null;}catch{return null;}
 }
+
+export function navWidthFromPointer(clientX,left){
+ if(!Number.isFinite(clientX)||!Number.isFinite(left))return DEFAULT_NAV_WIDTH;
+ return clampNavWidth(clientX-left);
+}
+export function inspectorPercentFromPointer(clientX,left,totalWidth){
+ if(!Number.isFinite(clientX)||!Number.isFinite(left)||
+   !Number.isFinite(totalWidth)||totalWidth<=0)return 50;
+ return clampInspectorPercent((clientX-left)*100/totalWidth);
+}
