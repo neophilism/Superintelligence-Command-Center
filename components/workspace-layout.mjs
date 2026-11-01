@@ -29,3 +29,32 @@ export function keyboardNavWidth(width,key,shiftKey=false){
  if(key==='ArrowRight')return clampNavWidth(width+step);
  return null;
 }
+
+/** Local private display preference scoped to a tenant and one domain. */
+export function inspectorStorageKey(tenant,domain){
+ if(typeof tenant!=='string'||tenant.length<1||tenant.length>128)
+   throw new TypeError('Valid tenant required');
+ return 'scc.workspace.inspectors.v1.'+encodeURIComponent(tenant)+'.'+layoutStorageKey(domain);
+}
+export function clampInspectorPercent(value){
+ return Number.isFinite(value)?Math.min(70,Math.max(30,Math.round(value))):50;
+}
+export function keyboardInspectorPercent(width,key,shiftKey=false){
+ const step=shiftKey?10:5;
+ if(key==='Home')return 30;
+ if(key==='End')return 70;
+ if(key==='ArrowLeft')return clampInspectorPercent(width-step);
+ if(key==='ArrowRight')return clampInspectorPercent(width+step);
+ return null;
+}
+export function readInspectorPercent(storage,tenant,domain){
+ try{
+   const value=JSON.parse(storage.getItem(inspectorStorageKey(tenant,domain))??'null');
+   return typeof value==='number'&&Number.isFinite(value)?clampInspectorPercent(value):50;
+ }catch{return 50;}
+}
+export function saveInspectorPercent(storage,tenant,domain,width){
+ const next=clampInspectorPercent(width);
+ try{storage.setItem(inspectorStorageKey(tenant,domain),JSON.stringify(next));}catch{}
+ return next;
+}

@@ -2,6 +2,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {WORKSPACE_DOMAINS} from '@superintelligence/ui';
 import {ProjectPortalClient} from '../vendor/engine/packages/ui/src/project-portal.mjs';
+import {readInspectorPercent,saveInspectorPercent,keyboardInspectorPercent} from './workspace-layout.mjs';
 
 const PIN_LIMIT=500;
 export function searchProjects(projects,query){
@@ -43,12 +44,28 @@ export function keyboardProjectIndex(index,key,length){
  return null;
 }
 
-export default function ProjectExplorer({engineOrigin='',onOpenProject=()=>{}}){
+export default function ProjectExplorer({engineOrigin='',domain='research',onOpenProject=()=>{}}){
  const client=useMemo(()=>{try{return new ProjectPortalClient({engineOrigin,product:'command'})}catch{return null}},[engineOrigin]);
  const [status,setStatus]=useState(client?'checking':'unconfigured'),[organizations,setOrganizations]=useState([]),[tenant,setTenant]=useState(''),[projects,setProjects]=useState([]),[query,setQuery]=useState(''),[selected,setSelected]=useState(null),[artifacts,setArtifacts]=useState([]),[artifact,setArtifact]=useState(''),[versions,setVersions]=useState([]),
- [secondaryArtifact,setSecondaryArtifact]=useState(''),[secondaryVersions,setSecondaryVersions]=useState([]),[editTitle,setEditTitle]=useState(''),[editKind,setEditKind]=useState('research'),[saving,setSaving]=useState(false),[pinnedIds,setPinnedIds]=useState([]),[selectedIds,setSelectedIds]=useState([]),[pinnedOnly,setPinnedOnly]=useState(false),[error,setError]=useState('');
+ [secondaryArtifact,setSecondaryArtifact]=useState(''),[secondaryVersions,setSecondaryVersions]=useState([]),
+ [inspectorPercent,setInspectorPercent]=useState(50),[editTitle,setEditTitle]=useState(''),[editKind,setEditKind]=useState('research'),[saving,setSaving]=useState(false),[pinnedIds,setPinnedIds]=useState([]),[selectedIds,setSelectedIds]=useState([]),[pinnedOnly,setPinnedOnly]=useState(false),[error,setError]=useState('');
  useEffect(()=>{if(!client){setStatus('unconfigured');return}let live=true;
   client.session().then(()=>client.tenants()).then(data=>{if(!live)return;const items=Array.isArray(data.items)?data.items:[];setOrganizations(items);setTenant(items[0]?.id||'');setStatus('ready');}).catch(e=>{if(live){setStatus(e.status===401?'signed-out':'unavailable')}});return()=>{live=false}},[client]);
+ useEffect(()=>{if(!tenant||typeof window==='undefined'){setInspectorPercent(50);return}
+   setInspectorPercent(readInspectorPercent(window.localStorage,tenant,domain));
+ },[tenant,domain]);
+ function resizeInspector(event){
+   const next=keyboardInspectorPercent(inspectorPercent,event.key,event.shiftKey);
+   if(next===null)return;
+   event.preventDefault();setInspectorPercent(next);
+   if(typeof window!=='undefined'&&tenant)
+     saveInspectorPercent(window.localStorage,tenant,domain,next);
+ }
+ function resetInspector(){
+   setInspectorPercent(50);
+   if(typeof window!=='undefined'&&tenant)
+     saveInspectorPercent(window.localStorage,tenant,domain,50);
+ }
  useEffect(()=>{if(!tenant||!client){setProjects([]);return}let live=true;setSelected(null);setArtifacts([]);setSelectedIds([]);setPinnedOnly(false);if(typeof window!=='undefined')setPinnedIds(readPinnedProjectIds(window.localStorage,tenant));client.projects(tenant).then(data=>{if(live)setProjects(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setError('Project list unavailable');setProjects([])}});return()=>{live=false}},[client,tenant]);
  useEffect(()=>{if(!client||!tenant||!selected){setArtifacts([]);return}let live=true;setArtifact('');setVersions([]);setSecondaryArtifact('');setSecondaryVersions([]);client.artifacts(tenant,selected.id).then(data=>{if(live)setArtifacts(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setArtifacts([]);setError('Artifact list unavailable')}});return()=>{live=false}},[client,tenant,selected]);
  useEffect(()=>{if(!client||!tenant||!selected||!artifact){setVersions([]);return}let live=true;client.revisions(tenant,selected.id,artifact).then(data=>{if(live)setVersions(Array.isArray(data.items)?data.items:[])}).catch(()=>{if(live){setVersions([]);setError('Revision history unavailable')}});return()=>{live=false}},[client,tenant,selected,artifact]);
@@ -109,12 +126,17 @@ export default function ProjectExplorer({engineOrigin='',onOpenProject=()=>{}}){
  h('button',{type:'submit',disabled:saving||!editTitle.trim()},saving?'Saving…':'Save metadata')),
  h('h4',null,'Artifacts'),
  ...artifacts.map(a=>h('button',{key:a.id,type:'button',onClick:()=>setArtifact(a.id),'aria-current':artifact===a.id?'true':undefined},a.mediaType+' · '+a.id)),
- h('div',{className:'professional-inspector-split','aria-label':'Two artifact inspectors'},
+ h('div',{className:'professional-inspector-split','aria-label':'Two artifact inspectors',
+   style:{'--inspector-left':inspectorPercent+'%'}},
    h('section',{'aria-label':'Primary artifact inspector',className:'professional-inspector'},
      h('h4',null,'Primary inspector'),
      artifact?h('div',null,h('p',null,'Artifact '+artifact),
        ...versions.map((v,i)=>h('p',{key:String(v.revision)+'-'+i},describeRevision(v))))
        :h('p',null,'Choose an artifact above.')),
+   h('div',{className:'professional-inspector-divider',role:'separator',tabIndex:0,
+      'aria-label':'Resize artifact inspectors','aria-orientation':'vertical',
+      'aria-valuemin':30,'aria-valuemax':70,'aria-valuenow':inspectorPercent,
+      onKeyDown:resizeInspector,title:'Use arrow keys or Home and End to resize'}),
    h('section',{'aria-label':'Secondary artifact inspector',className:'professional-inspector'},
      h('h4',null,'Secondary inspector'),
      h('label',null,'Choose another artifact',
@@ -124,7 +146,9 @@ export default function ProjectExplorer({engineOrigin='',onOpenProject=()=>{}}){
          ...artifacts.map(a=>h('option',{key:a.id,value:a.id},a.mediaType+' · '+a.id)))),
      secondaryArtifact?h('div',null,h('p',null,'Artifact '+secondaryArtifact),
        ...secondaryVersions.map((v,i)=>h('p',{key:String(v.revision)+'-'+i},describeRevision(v))))
-       :h('p',null,'No second artifact selected.')))
+       :h('p',null,'No second artifact selected.'))),
+   h('button',{type:'button',className:'reset-inspector',onClick:resetInspector},
+     'Reset inspector split')
    ):h('p',null,'Select a project to inspect its artifacts and versions.')))):h('p',null,status==='unconfigured'?'Configure the engine origin to access projects.':status==='signed-out'?'Sign in using the shared project portal.':'Project explorer is currently unavailable.'),
  error?h('p',{role:'alert'},error):null);
 }

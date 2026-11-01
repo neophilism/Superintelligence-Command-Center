@@ -46,7 +46,7 @@ export default function Page(){
      React.createElement('main',{id:'main',className:'app-main',tabIndex:-1},
        React.createElement('div',{className:'hero'},React.createElement('p',{className:'eyebrow'},"AI COMMAND WORKSPACE"),React.createElement('h1',null,"Everything you create, in one place"),React.createElement('p',null,"Choose a domain. The workspace interface is shared with Academy, without instructional overlays or courseware.")),
        React.createElement(ProjectPortal,{product:"command",domain:active,engineOrigin:process.env.NEXT_PUBLIC_ENGINE_ORIGIN||'',companionOrigin:process.env.NEXT_PUBLIC_ACADEMY_ORIGIN||'',onOpenProject:project=>{if(WORKSPACE_DOMAINS.includes(project.kind))setActive(project.kind);setMessage('')}}),
-       React.createElement(ProjectExplorer,{engineOrigin:process.env.NEXT_PUBLIC_ENGINE_ORIGIN||'',onOpenProject:p=>{if(WORKSPACE_DOMAINS.includes(p.kind))setActive(p.kind)}}),
+       React.createElement(ProjectExplorer,{domain:active,engineOrigin:process.env.NEXT_PUBLIC_ENGINE_ORIGIN||'',onOpenProject:p=>{if(WORKSPACE_DOMAINS.includes(p.kind))setActive(p.kind)}}),
        React.createElement(ModelControls,{domain:active}),
        React.createElement(WorkspaceShell,{product:"command",domain:active,title:names[active]},
          React.createElement(ToolPanel,{title:'Prepare your work'},

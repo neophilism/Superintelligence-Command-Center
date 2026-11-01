@@ -5,3 +5,10 @@
 .professional-inspector h4{margin-top:0}
 .professional-inspector select{width:100%;max-width:100%}
 @media(max-width:920px){.professional-inspector-split{grid-template-columns:1fr}}
+
+.professional-inspector-split{grid-template-columns:minmax(0,var(--inspector-left,50%)) 8px minmax(0,1fr);gap:8px}
+.professional-inspector-divider{background:#30475b;border:1px solid #617b90;cursor:col-resize}
+.professional-inspector-divider:focus-visible{outline:3px solid #8bd6ff;outline-offset:-2px}
+.professional-inspector-split .reset-inspector{grid-column:1/-1;width:auto;justify-self:start;padding:7px 12px}
+@media(max-width:920px){.professional-inspector-split{display:grid;grid-template-columns:minmax(0,1fr)}
+ .professional-inspector-divider{display:none}}
