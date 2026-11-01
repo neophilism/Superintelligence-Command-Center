@@ -5,6 +5,7 @@ import CommandPalette from '../components/command-palette.mjs';
 import ModelControls from '../components/model-controls.mjs';
 import ProjectExplorer from '../components/project-explorer.mjs';
 import JobTray from '../components/job-tray.mjs';
+import '../components/job-tray.css';
 const names={code:'Code',music:'Music',poetry:'Poetry','persuasive-writing':'Persuasive writing',research:'Research',legislation:'Legislation',image:'Images',video:'Film & video',voice:'Voice',data:'Data',workflow:'Workflows'};
 const controls=[{id:'objective',kind:'textarea',label:'Project objective',description:'Define what you want to accomplish. External AI execution is unavailable until an authorized provider and spending controls are connected.',rows:5}];
 export default function Page(){
