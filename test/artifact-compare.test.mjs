@@ -31,7 +31,8 @@ test('restore preserves both old revisions and creates a separately verified new
   restoreAsNewRevision:async({sourceRevision,expectedHeadRevision})=>{
    attempts++;
    assert.equal(sourceRevision,1);assert.equal(expectedHeadRevision,2);
-   versions=[...versions,{...old,revision:3,parentRevision:2}];
+   versions=[...versions,{...old,revision:3,parentRevision:2,restoredFromRevision:1}];
+   return {newRevision:3};
   }
  };
  const result=await restoreAsNewRevision(adapter,{tenantId:'org',projectId:'project',
@@ -49,6 +50,15 @@ test('stale restore, unverifiable overwrite or unavailable engine fails closed',
  await assert.rejects(restoreAsNewRevision(stale,scope),/STALE_HEAD/);
  const destructive={listRevisions:(()=>{let calls=0;return async()=>{
    calls++;return calls===1?[old,newer]:[{...newer,revision:3}];}})(),
-   restoreAsNewRevision:async()=>{}};
+   restoreAsNewRevision:async()=>({newRevision:3})};
  await assert.rejects(restoreAsNewRevision(destructive,scope),/NOT_INDEPENDENTLY_VERIFIED/);
+});
+
+test('unrelated concurrent new head cannot be mistaken for restored source',async()=>{
+ const oldHead={...newer,revision:2};
+ const other={...newer,revision:3,parentRevision:2,restoredFromRevision:999};
+ const client={listRevisions:async()=>[old,oldHead,other],
+  restoreAsNewRevision:async()=>({newRevision:3})};
+ await assert.rejects(restoreAsNewRevision(client,{tenantId:'org',projectId:'project',
+  artifactId:'artifact',sourceRevision:1,expectedHeadRevision:3}),/RESTORE_RECEIPT_NOT_VERIFIED/);
 });

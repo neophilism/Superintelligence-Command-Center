@@ -19,3 +19,10 @@ SIE-007 is external to this assigned repository, so live restore endpoint
 binding, authorization revocation, media-specific content diff and audit
 ledger evidence remain unimplemented. Browser tests and cross-product
 lineage review are also required for production acceptance.
+
+The restore adapter must return a `newRevision` receipt, and the
+independent server read must show that exact revision with parent
+`expectedHeadRevision`, explicit `restoredFromRevision`, and every
+previous revision/checksum intact. An unrelated concurrent revision is not
+proof of a restore. The exact server-owned SIE-007 response remains to be
+verified before wiring any real endpoint.

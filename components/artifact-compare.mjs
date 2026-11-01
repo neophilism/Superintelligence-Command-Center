@@ -38,20 +38,26 @@ export async function restoreAsNewRevision(adapter,{tenantId,projectId,artifactI
    if(!Number.isSafeInteger(value)||value<0)throw new TypeError('Valid revision IDs required');
  }
  const before=await adapter.listRevisions({tenantId,projectId,artifactId});
- if(!Array.isArray(before)||!before.some(v=>v.revision===sourceRevision)||
+ if(!Array.isArray(before)||before.length>10000||
+   !before.some(v=>v.revision===sourceRevision)||
    !before.some(v=>v.revision===expectedHeadRevision))
    throw new Error('RESTORE_REVISION_NOT_VISIBLE');
  if(expectedHeadRevision!==Math.max(...before.map(v=>v.revision)))
    throw new Error('RESTORE_STALE_HEAD');
- await adapter.restoreAsNewRevision({tenantId,projectId,artifactId,
+ const receipt=await adapter.restoreAsNewRevision({tenantId,projectId,artifactId,
    sourceRevision,expectedHeadRevision});
+ if(!Number.isSafeInteger(receipt?.newRevision)||receipt.newRevision<=expectedHeadRevision)
+   throw new Error('RESTORE_RECEIPT_NOT_VERIFIED');
  const after=await adapter.listRevisions({tenantId,projectId,artifactId});
- const next=Math.max(...after.map(v=>v.revision));
- if(!Number.isSafeInteger(next)||next<=expectedHeadRevision||
+ if(!Array.isArray(after)||after.length>10000)
+   throw new Error('RESTORE_NOT_INDEPENDENTLY_VERIFIED');
+ const created=after.find(v=>v.revision===receipt.newRevision);
+ if(!created||created.parentRevision!==expectedHeadRevision||
+   created.restoredFromRevision!==sourceRevision||
    !before.every(previous=>after.some(value=>
      value.revision===previous.revision&&value.checksum===previous.checksum)))
    throw new Error('RESTORE_NOT_INDEPENDENTLY_VERIFIED');
- return {createdRevision:next,nonDestructive:true};
+ return {createdRevision:created.revision,nonDestructive:true};
 }
 export default function ArtifactCompare({versions=[],onRestore=null}){
  const [left,setLeft]=useState(''),[right,setRight]=useState(''),[error,setError]=useState('');
