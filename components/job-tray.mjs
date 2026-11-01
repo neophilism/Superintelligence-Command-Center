@@ -39,14 +39,15 @@ export default function JobTray({client=null}){
  const [status,setStatus]=useState(client?'loading':'unconfigured');
  const [runs,setRuns]=useState([]),[selected,setSelected]=useState(''),
    [busy,setBusy]=useState(''),[error,setError]=useState('');
- async function refresh(){
+ async function refresh({preserveError=false}={}){
    if(!client){setStatus('unconfigured');return}
-   setStatus('loading');setError('');
+   setStatus('loading');if(!preserveError)setError('');
    try{
      const raw=await client.listRuns({limit:100});
      setRuns(previous=>mergeAuthoritativeRuns(previous,raw));
      setStatus('ready');
-   }catch{setRuns([]);setStatus('unavailable');setError('Job states could not be verified from the engine.')}
+   }catch{setRuns([]);setStatus('unavailable');
+     if(!preserveError)setError('Job states could not be verified from the engine.');}
  }
  useEffect(()=>{let live=true;if(!client){setStatus('unconfigured');return}
    client.listRuns({limit:100}).then(raw=>{
@@ -64,14 +65,14 @@ export default function JobTray({client=null}){
      await refresh();
    }catch{
      setError('Operation was not confirmed. Refresh job status before trying again.');
-     try{await refresh();}catch{}
+     try{await refresh({preserveError:true});}catch{}
    }finally{setBusy('')}
  }
  const h=React.createElement;
  const selectedRun=runs.find(run=>run.runId===selected)||null;
  return h('section',{className:'job-tray','aria-label':'Background jobs'},
    h('header',null,h('h2',null,'Job tray'),
-     h('button',{type:'button',disabled:!client||status==='loading',onClick:refresh},'Refresh')),
+     h('button',{type:'button',disabled:!client||status==='loading',onClick:()=>refresh()},'Refresh')),
    status==='unconfigured'?h('p',{role:'status'},
      'Background run reattachment requires an authenticated SIE-017 engine adapter. No jobs are fabricated.'):
    status==='unavailable'?h('p',{role:'alert'},'Job service unavailable; no local job state is authoritative.'):
