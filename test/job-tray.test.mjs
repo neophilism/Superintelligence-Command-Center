@@ -12,7 +12,7 @@ test('run states come only from validated server response, no invented cost',()=
  assert.equal(valid.state,'running');assert.equal(valid.canCancel,true);
  assert.equal(valid.canRetry,false);assert.equal(formatVerifiedCost(valid.reconciledCostCents),
    'Not yet reconciled');
- assert.match(formatVerifiedCost(145),'1.45');
+ assert.match(formatVerifiedCost(145),/1\.45/);
  assert.equal(displayDuration(3661),'1h 1m');
  assert.equal(Object.keys(valid).includes('prompt'),false);
 });
