@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import JobTray,{normalizeRemoteRun,normalizeRunList,mergeAuthoritativeRuns,
- formatVerifiedCost,displayDuration} from '../components/job-tray.mjs';
+ formatVerifiedCost,displayDuration,fetchVerifiedRuns,applyVerifiedJobAction} from '../components/job-tray.mjs';
 
 const run={runId:'run-123',projectId:'project-456',revision:9,state:'running',
  elapsedSeconds:3661,provider:'provider',reconciledCostCents:null,canCancel:true,canRetry:false};
@@ -35,4 +35,36 @@ test('no synthetic background tasks appear without a configured engine',()=>{
  assert.match(html,/requires an authenticated SIE-017 engine adapter/);
  assert.doesNotMatch(html,/project-456/);
  assert.doesNotMatch(html,/Request cancellation/);
+});
+
+test('server-backed job relaunch reattaches and cancellation reflects actual worker state',async()=>{
+ let current={...run};
+ const calls=[];
+ const client={
+  listRuns:async()=>({items:[current]}),
+  cancelRun:async(id,{expectedRevision})=>{
+   calls.push({id,expectedRevision});
+   if(id!==current.runId||expectedRevision!==current.revision)
+     throw Error('revision_conflict');
+   current={...current,revision:current.revision+1,state:'cancelled',canCancel:false};
+  }
+ };
+ const firstMount=await fetchVerifiedRuns(client);
+ assert.equal(firstMount[0].state,'running');
+ const result=await applyVerifiedJobAction(client,firstMount[0],'cancel');
+ assert.equal(result[0].state,'cancelled');
+ const reopenedMount=await fetchVerifiedRuns(client);
+ assert.equal(reopenedMount[0].state,'cancelled');
+ assert.deepEqual(calls,[{id:'run-123',expectedRevision:9}]);
+ await assert.rejects(applyVerifiedJobAction(client,firstMount[0],'cancel'),/revision_conflict/);
+});
+test('server denied cancel and unknown action never report success',async()=>{
+ const client={
+  listRuns:async()=>({items:[run]}),
+  cancelRun:async()=>{throw Error('DENIED')}
+ };
+ const fresh=(await fetchVerifiedRuns(client))[0];
+ await assert.rejects(applyVerifiedJobAction(client,fresh,'cancel'),/DENIED/);
+ assert.equal((await fetchVerifiedRuns(client))[0].state,'running');
+ await assert.rejects(applyVerifiedJobAction(client,fresh,'reboot'),/Invalid job action/);
 });

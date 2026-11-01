@@ -28,6 +28,22 @@ export function normalizeRunList(data){
 /** Server is authoritative. Never overwrite its state with locally optimistic
  * cancelled, completed or billing claims, even after an action response. */
 export function mergeAuthoritativeRuns(_local,serverData){return normalizeRunList(serverData)}
+export async function fetchVerifiedRuns(client){
+ if(!client||typeof client.listRuns!=='function')throw new TypeError('Authenticated job client required');
+ return normalizeRunList(await client.listRuns({limit:100}));
+}
+/** An operation is never acknowledged from its HTTP response alone: follow
+ * the current engine run revision with an independent authoritative read. */
+export async function applyVerifiedJobAction(client,run,kind){
+ if(kind==='cancel'){
+   if(!run.canCancel||typeof client.cancelRun!=='function')throw new TypeError('Cancellation unavailable');
+   await client.cancelRun(run.runId,{expectedRevision:run.revision});
+ }else if(kind==='retry'){
+   if(!run.canRetry||typeof client.retryRun!=='function')throw new TypeError('Retry unavailable');
+   await client.retryRun(run.runId,{expectedRevision:run.revision});
+ }else throw new TypeError('Invalid job action');
+ return fetchVerifiedRuns(client);
+}
 export function formatVerifiedCost(cents){
  return cents===null?'Not yet reconciled':(cents/100).toLocaleString('en-US',
    {style:'currency',currency:'USD'});
@@ -43,15 +59,15 @@ export default function JobTray({client=null}){
    if(!client){setStatus('unconfigured');return}
    setStatus('loading');if(!preserveError)setError('');
    try{
-     const raw=await client.listRuns({limit:100});
-     setRuns(previous=>mergeAuthoritativeRuns(previous,raw));
+     const fresh=await fetchVerifiedRuns(client);
+     setRuns(fresh);
      setStatus('ready');
    }catch{setRuns([]);setStatus('unavailable');
      if(!preserveError)setError('Job states could not be verified from the engine.');}
  }
  useEffect(()=>{let live=true;if(!client){setStatus('unconfigured');return}
-   client.listRuns({limit:100}).then(raw=>{
-     if(!live)return;setRuns(normalizeRunList(raw));setStatus('ready');
+   fetchVerifiedRuns(client).then(fresh=>{
+     if(!live)return;setRuns(fresh);setStatus('ready');
    }).catch(()=>{if(live){setRuns([]);setStatus('unavailable')}});
    return()=>{live=false};
  },[client]);
@@ -59,10 +75,8 @@ export default function JobTray({client=null}){
    if(!client||busy||!(kind==='cancel'?run.canCancel:run.canRetry))return;
    setBusy(run.runId);setError('');
    try{
-     if(kind==='cancel')await client.cancelRun(run.runId,{expectedRevision:run.revision});
-     else await client.retryRun(run.runId,{expectedRevision:run.revision});
-     // Do not claim a new status until independently fetched from the server.
-     await refresh();
+     const fresh=await applyVerifiedJobAction(client,run,kind);
+     setRuns(fresh);setStatus('ready');
    }catch{
      setError('Operation was not confirmed. Refresh job status before trying again.');
      try{await refresh({preserveError:true});}catch{}
